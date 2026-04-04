@@ -3,8 +3,8 @@
    Replace YOUR_SUPABASE_URL and YOUR_SUPABASE_ANON_KEY
    with your actual values from Supabase → Settings → API
    ============================================================ */
-const SUPABASE_URL = 'YOUR_SUPABASE_URL';
-const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
+const SUPABASE_URL = 'https://yvueitwmbjqkraxdutlt.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_M7jJxdgOcUqvkLE_i89Psw_1yJuahG5';
 
 const BRANCHES = [
   'DR','DAN','BNG','HO','VAPI','DAHEJ','MNG','CHENNAI',
@@ -12,9 +12,9 @@ const BRANCHES = [
 ];
 
 const MONTHS = [
-  'April 2025','May 2025','June 2025','July 2025','August 2025',
-  'September 2025','October 2025','November 2025','December 2025',
-  'January 2026','February 2026','March 2026'
+  'April 2026','May 2026','June 2026','July 2026','August 2026',
+  'September 2026','October 2026','November 2026','December 2026',
+  'January 2027','February 2027','March 2027'
 ];
 
 const BRANCH_STATE_MAP = {
