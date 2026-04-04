@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Attendance Portal — SFM</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+:root {
+  --navy:#0f1f3d; --blue:#1e3a5f; --accent:#f6c90e;
+  --present:#1a7a4a; --absent:#c0392b; --halfday:#d68910; --leave:#7d3c98;
+  --green-bg:#e8f8f0; --red-bg:#fdf0ee; --yellow-bg:#fef9e7; --purple-bg:#f5eef8;
+  --white:#fff; --surface:#f4f6fb; --border:#e2e8f0; --text:#1a2332; --muted:#718096;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Barlow',sans-serif;background:var(--surface);min-height:100vh;color:var(--text)}
+/* NAV */
+.nav{background:linear-gradient(135deg,var(--navy),var(--blue));padding:0 24px;height:58px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 2px 15px rgba(0,0,0,.25);position:sticky;top:0;z-index:100}
+.nav-brand{font-family:'Barlow Condensed',sans-serif;font-size:1.2rem;font-weight:800;color:var(--white);display:flex;align-items:center;gap:10px}
+.nav-brand span{color:var(--accent)}
+.nav-right{display:flex;align-items:center;gap:14px}
+.branch-pill{background:rgba(246,201,14,.2);border:1px solid rgba(246,201,14,.4);color:var(--accent);padding:5px 14px;border-radius:20px;font-size:.8rem;font-weight:700;letter-spacing:.5px}
+.btn-logout{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:rgba(255,255,255,.8);padding:6px 14px;border-radius:8px;font-size:.8rem;cursor:pointer;transition:.2s;font-family:'Barlow',sans-serif}
+.btn-logout:hover{background:rgba(255,255,255,.2)}
+/* MAIN */
+.main{max-width:1100px;margin:0 auto;padding:28px 20px}
+/* DATE HEADER */
+.date-header{background:linear-gradient(135deg,var(--navy),var(--blue));border-radius:16px;padding:24px 28px;margin-bottom:24px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;box-shadow:0 4px 20px rgba(15,31,61,.2)}
+.date-info h2{font-family:'Barlow Condensed',sans-serif;font-size:2rem;font-weight:800;color:var(--white);line-height:1}
+.date-info p{color:rgba(255,255,255,.6);font-size:.85rem;margin-top:4px}
+.date-badge{background:var(--accent);color:var(--navy);padding:8px 18px;border-radius:30px;font-family:'Barlow Condensed',sans-serif;font-size:1rem;font-weight:800;text-align:center;line-height:1.3}
+/* LOCKOUT BANNER */
+.lockout-banner{background:#fff0f0;border:2px solid var(--absent);border-radius:14px;padding:28px;text-align:center;margin-bottom:20px}
+.lockout-banner i{font-size:2.5rem;color:var(--absent);margin-bottom:12px;display:block}
+.lockout-banner h3{color:var(--absent);font-size:1.2rem;font-weight:700;margin-bottom:8px}
+.lockout-banner p{color:#7a2e2e;font-size:.9rem;max-width:480px;margin:0 auto}
+/* ALREADY SUBMITTED */
+.submitted-banner{background:#e8f8f0;border:2px solid var(--present);border-radius:14px;padding:24px;text-align:center;margin-bottom:20px}
+.submitted-banner i{font-size:2.5rem;color:var(--present);margin-bottom:12px;display:block}
+.submitted-banner h3{color:var(--present);font-weight:700;margin-bottom:6px}
+/* CARD */
+.card{background:var(--white);border-radius:14px;box-shadow:0 2px 16px rgba(0,0,0,.07);overflow:hidden;margin-bottom:20px}
+.card-head{background:linear-gradient(135deg,var(--navy),var(--blue));color:var(--white);padding:14px 20px;display:flex;align-items:center;justify-content:space-between}
+.card-head h3{font-family:'Barlow Condensed',sans-serif;font-size:1.1rem;font-weight:700;display:flex;align-items:center;gap:8px}
+.card-body{padding:20px}
+/* FILTER */
+.filter-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:18px}
+.filter-row input{flex:1;min-width:180px;padding:9px 14px;border:1.5px solid var(--border);border-radius:8px;font-family:'Barlow',sans-serif;font-size:.88rem;outline:none;transition:.2s}
+.filter-row input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(246,201,14,.15)}
+.fill-btn{background:var(--navy);color:var(--white);border:none;padding:9px 16px;border-radius:8px;font-size:.82rem;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;white-space:nowrap;font-family:'Barlow',sans-serif}
+.fill-btn:hover{background:var(--blue)}
+/* TABLE */
+.att-table{width:100%;border-collapse:collapse}
+.att-table thead th{background:#f8faff;font-size:.75rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;padding:10px 12px;border-bottom:2px solid var(--border);text-align:left}
+.att-table tbody td{padding:10px 12px;border-bottom:1px solid #f0f4f8;font-size:.88rem;vertical-align:middle}
+.att-table tbody tr:hover{background:#fafbff}
+.att-table tbody tr:last-child td{border-bottom:none}
+/* STATUS BUTTONS */
+.status-group{display:flex;gap:4px;flex-wrap:wrap}
+.status-btn{padding:5px 12px;border:1.5px solid;border-radius:6px;font-size:.75rem;font-weight:700;cursor:pointer;transition:.15s;background:transparent;font-family:'Barlow',sans-serif;white-space:nowrap}
+.status-btn.P{border-color:var(--present);color:var(--present)}
+.status-btn.P.sel{background:var(--present);color:#fff}
+.status-btn.A{border-color:var(--absent);color:var(--absent)}
+.status-btn.A.sel{background:var(--absent);color:#fff}
+.status-btn.H{border-color:var(--halfday);color:var(--halfday)}
+.status-btn.H.sel{background:var(--halfday);color:#fff}
+.status-btn.L{border-color:var(--leave);color:var(--leave)}
+.status-btn.L.sel{background:var(--leave);color:#fff}
+/* SUMMARY BAR */
+.summary-bar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:18px}
+.sum-box{flex:1;min-width:90px;background:var(--surface);border-radius:10px;padding:12px;text-align:center}
+.sum-box .cnt{font-family:'Barlow Condensed',sans-serif;font-size:1.6rem;font-weight:800}
+.sum-box .lbl{font-size:.72rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-top:2px}
+.sum-box.P .cnt{color:var(--present)}
+.sum-box.A .cnt{color:var(--absent)}
+.sum-box.H .cnt{color:var(--halfday)}
+.sum-box.L .cnt{color:var(--leave)}
+/* SUBMIT */
+.submit-row{display:flex;justify-content:flex-end;gap:12px;padding:16px 20px;border-top:1px solid var(--border)}
+.btn-submit{background:linear-gradient(135deg,var(--accent),#e8b800);color:var(--navy);border:none;padding:12px 28px;border-radius:10px;font-family:'Barlow Condensed',sans-serif;font-size:1.05rem;font-weight:800;cursor:pointer;display:flex;align-items:center;gap:8px;transition:.2s}
+.btn-submit:hover{transform:translateY(-1px);box-shadow:0 6px 18px rgba(246,201,14,.35)}
+.btn-submit:disabled{opacity:.5;pointer-events:none}
+/* HISTORY TABLE */
+.hist-table{width:100%;border-collapse:collapse;font-size:.83rem}
+.hist-table th{background:#f8faff;padding:8px 10px;text-align:left;font-size:.72rem;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);border-bottom:2px solid var(--border)}
+.hist-table td{padding:8px 10px;border-bottom:1px solid #f0f4f8}
+.badge{display:inline-block;padding:3px 9px;border-radius:12px;font-size:.72rem;font-weight:700}
+.badge.P{background:var(--green-bg);color:var(--present)}
+.badge.A{background:var(--red-bg);color:var(--absent)}
+.badge.H{background:var(--yellow-bg);color:var(--halfday)}
+.badge.L{background:var(--purple-bg);color:var(--leave)}
+/* TOAST */
+#toast{position:fixed;bottom:24px;right:24px;z-index:9999;display:flex;flex-direction:column;gap:8px}
+.t-msg{padding:12px 18px;border-radius:10px;color:#fff;font-size:.88rem;font-weight:600;box-shadow:0 4px 16px rgba(0,0,0,.2);animation:tIn .3s ease;display:flex;align-items:center;gap:8px}
+.t-msg.success{background:var(--present)}.t-msg.error{background:var(--absent)}.t-msg.info{background:var(--blue)}
+@keyframes tIn{from{transform:translateX(100%);opacity:0}to{transform:translateX(0);opacity:1}}
+/* LOADING */
+#overlay{position:fixed;inset:0;background:rgba(255,255,255,.85);z-index:9998;display:none;align-items:center;justify-content:center;flex-direction:column;gap:12px}
+#overlay.on{display:flex}
+.spin{width:44px;height:44px;border:4px solid #e0e0e0;border-top-color:var(--blue);border-radius:50%;animation:sp .8s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+#overlay p{color:var(--blue);font-weight:600;font-size:.9rem}
+/* TABS */
+.view-tabs{display:flex;gap:4px;background:#f0f4f8;padding:5px;border-radius:10px;margin-bottom:16px}
+.v-tab{flex:1;padding:8px;background:none;border:none;border-radius:7px;font-family:'Barlow',sans-serif;font-size:.82rem;font-weight:600;color:var(--muted);cursor:pointer;transition:.2s}
+.v-tab.active{background:var(--white);color:var(--navy);box-shadow:0 2px 8px rgba(0,0,0,.08)}
+@media(max-width:600px){
+  .status-group{flex-direction:row}
+  .status-btn{padding:4px 8px;font-size:.7rem}
+  .date-header{flex-direction:column}
+}
+</style>
+</head>
+<body>
+<div id="overlay"><div class="spin"></div><p id="ol-text">Loading...</p></div>
+<div id="toast"></div>
+
+<nav class="nav">
+  <div class="nav-brand"><i class="fas fa-clipboard-check"></i>Attendance Portal <span>· SFM</span></div>
+  <div class="nav-right">
+    <div class="branch-pill" id="branch-label">--</div>
+    <button class="btn-logout" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</button>
+  </div>
+</nav>
+
+<div class="main">
+  <!-- Date header -->
+  <div class="date-header">
+    <div class="date-info">
+      <h2 id="today-label">Loading...</h2>
+      <p id="today-sub">Attendance for today</p>
+    </div>
+    <div class="date-badge" id="date-badge">--</div>
+  </div>
+
+  <!-- Lockout banner (hidden by default) -->
+  <div class="lockout-banner" id="lockout-banner" style="display:none">
+    <i class="fas fa-lock"></i>
+    <h3>Attendance Locked</h3>
+    <p id="lockout-msg">You missed submitting attendance on a previous working day. Please contact your Admin to unlock.</p>
+  </div>
+
+  <!-- Already submitted banner -->
+  <div class="submitted-banner" id="submitted-banner" style="display:none">
+    <i class="fas fa-check-circle"></i>
+    <h3>Attendance Already Submitted for Today</h3>
+    <p>Today's attendance has been recorded. You can view the history below.</p>
+  </div>
+
+  <!-- Main attendance card -->
+  <div class="card" id="att-card">
+    <div class="card-head">
+      <h3><i class="fas fa-users"></i> Mark Attendance — <span id="card-branch-label">--</span></h3>
+      <span style="font-size:.8rem;opacity:.7" id="emp-count-label"></span>
+    </div>
+    <div class="card-body">
+      <!-- Summary -->
+      <div class="summary-bar">
+        <div class="sum-box P"><div class="cnt" id="cnt-p">0</div><div class="lbl">Present</div></div>
+        <div class="sum-box H"><div class="cnt" id="cnt-h">0</div><div class="lbl">Half Day</div></div>
+        <div class="sum-box L"><div class="cnt" id="cnt-l">0</div><div class="lbl">Leave</div></div>
+        <div class="sum-box A"><div class="cnt" id="cnt-a">0</div><div class="lbl">Absent</div></div>
+        <div class="sum-box" style="background:#f0f0f5"><div class="cnt" id="cnt-u" style="color:#aaa">0</div><div class="lbl">Unmarked</div></div>
+      </div>
+      <!-- Filter + bulk fill -->
+      <div class="filter-row">
+        <input type="text" id="emp-search" placeholder="Search employee..." oninput="filterEmps()">
+        <button class="fill-btn" onclick="bulkMark('Present')"><i class="fas fa-check-double"></i> All Present</button>
+        <button class="fill-btn" onclick="bulkMark('Absent')" style="background:#c0392b"><i class="fas fa-times"></i> All Absent</button>
+      </div>
+      <!-- Employee table -->
+      <div style="overflow-x:auto">
+        <table class="att-table" id="emp-table">
+          <thead><tr>
+            <th>#</th><th>Emp ID</th><th>Name</th><th>Designation</th>
+            <th>Status</th>
+          </tr></thead>
+          <tbody id="emp-body">
+            <tr><td colspan="5" style="text-align:center;padding:30px;color:var(--muted)">Loading employees...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="submit-row">
+      <button class="btn-submit" id="submit-btn" onclick="submitAttendance()">
+        <i class="fas fa-paper-plane"></i> Submit Today's Attendance
+      </button>
+    </div>
+  </div>
+
+  <!-- History -->
+  <div class="card">
+    <div class="card-head"><h3><i class="fas fa-history"></i> Attendance History</h3></div>
+    <div class="card-body">
+      <div class="view-tabs">
+        <button class="v-tab active" onclick="switchHistView('daily',this)">By Date</button>
+        <button class="v-tab" onclick="switchHistView('employee',this)">By Employee</button>
+      </div>
+      <div id="hist-filters" style="display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap">
+        <input type="month" id="hist-month" style="padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;font-family:'Barlow',sans-serif;font-size:.85rem;outline:none">
+        <select id="hist-emp-filter" style="padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;font-family:'Barlow',sans-serif;font-size:.85rem;outline:none;display:none">
+          <option value="">All Employees</option>
+        </select>
+        <button class="fill-btn" onclick="loadHistory()"><i class="fas fa-search"></i> View</button>
+      </div>
+      <div id="hist-content"><p style="color:var(--muted);font-size:.88rem">Select a month and click View.</p></div>
+    </div>
+  </div>
+</div>
+
+<script src="config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const { createClient } = supabase;
+const db = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+// Auth check
+const user = JSON.parse(sessionStorage.getItem('sfm_user') || 'null');
+if (!user || user.type !== 'branch') { window.location.href = 'index.html'; }
+
+const BRANCH = user.branch;
+document.getElementById('branch-label').textContent = BRANCH;
+document.getElementById('card-branch-label').textContent = BRANCH;
+
+let employees = [];
+let attMap = {}; // empId -> status
+let todayStr = '';
+let histView = 'daily';
+
+function ol(on, txt='Loading...') {
+  document.getElementById('overlay').classList.toggle('on', on);
+  document.getElementById('ol-text').textContent = txt;
+}
+function toast(msg, type='info') {
+  const d = document.createElement('div');
+  d.className = 't-msg ' + type;
+  d.innerHTML = '<i class="fas fa-'+(type==='success'?'check':type==='error'?'times':'info-circle')+'"></i>' + msg;
+  document.getElementById('toast').appendChild(d);
+  setTimeout(() => d.remove(), 3500);
+}
+function logout() {
+  sessionStorage.clear();
+  window.location.href = 'index.html';
+}
+
+// ===================== DATE LOGIC =====================
+function getTodayStr() {
+  // Returns YYYY-MM-DD in local time
+  const d = new Date();
+  return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+}
+function isWeekend(dateStr) {
+  // Returns true if Sunday (0)
+  const d = new Date(dateStr + 'T00:00:00');
+  return d.getDay() === 0;
+}
+function isSunday(dateStr) {
+  const d = new Date(dateStr + 'T00:00:00');
+  return d.getDay() === 0;
+}
+function getPrevWorkingDay(dateStr) {
+  // Get previous Mon-Sat from dateStr
+  const d = new Date(dateStr + 'T00:00:00');
+  do {
+    d.setDate(d.getDate() - 1);
+  } while (d.getDay() === 0); // skip Sundays
+  return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+}
+function formatDateDisplay(dateStr) {
+  const d = new Date(dateStr + 'T00:00:00');
+  return d.toLocaleDateString('en-IN', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
+}
+
+// ===================== INIT =====================
+async function init() {
+  ol(true, 'Loading attendance portal...');
+  todayStr = getTodayStr();
+
+  const d = new Date(todayStr + 'T00:00:00');
+  document.getElementById('today-label').textContent = formatDateDisplay(todayStr);
+  document.getElementById('today-sub').textContent = 'Attendance Entry for ' + BRANCH;
+  document.getElementById('date-badge').textContent = d.toLocaleDateString('en-IN',{month:'short',day:'numeric',year:'numeric'});
+
+  // Set history month default
+  document.getElementById('hist-month').value = todayStr.substring(0,7);
+
+  // Load employees
+  const { data: emps, error: empErr } = await db
+    .from('employees')
+    .select('emp_id, name, designation, status')
+    .eq('branch', BRANCH)
+    .eq('status', 'Active')
+    .order('name');
+
+  if (empErr || !emps) { toast('Error loading employees: ' + (empErr?.message||''), 'error'); ol(false); return; }
+  employees = emps;
+
+  // Populate history emp filter
+  const sel = document.getElementById('hist-emp-filter');
+  employees.forEach(e => {
+    const o = document.createElement('option');
+    o.value = e.emp_id; o.textContent = e.name + ' (' + e.emp_id + ')';
+    sel.appendChild(o);
+  });
+
+  // Check if today is Sunday
+  if (isSunday(todayStr)) {
+    document.getElementById('att-card').style.display = 'none';
+    document.getElementById('submitted-banner').style.display = 'block';
+    document.getElementById('submitted-banner').querySelector('h3').textContent = 'Today is Sunday — No Attendance';
+    document.getElementById('submitted-banner').querySelector('p').textContent = 'Attendance entry is not required on Sundays.';
+    ol(false);
+    return;
+  }
+
+  // Check lockout: did branch submit yesterday (prev working day)?
+  await checkLockout();
+  ol(false);
+}
+
+async function checkLockout() {
+  // Get session (last submitted date)
+  const { data: sess } = await db
+    .from('attendance_sessions')
+    .select('*')
+    .eq('branch_code', BRANCH)
+    .single();
+
+  const prevDay = getPrevWorkingDay(todayStr);
+
+  // If there's a previous working day and it's not Sunday-reset eligible
+  if (sess && sess.last_submitted_date) {
+    const lastDate = sess.last_submitted_date;
+
+    // Check if today already submitted
+    if (lastDate === todayStr) {
+      document.getElementById('att-card').style.display = 'none';
+      document.getElementById('submitted-banner').style.display = 'block';
+      return;
+    }
+
+    // Check if prev working day was missed
+    // Sunday resets: if prevDay is the day before today and today is Monday, allow
+    const todayDow = new Date(todayStr + 'T00:00:00').getDay();
+    const isMondayFresh = (todayDow === 1); // Monday always starts fresh (Sunday reset)
+
+    if (!isMondayFresh && lastDate !== prevDay) {
+      // Missed a working day — LOCKOUT
+      document.getElementById('att-card').style.display = 'none';
+      document.getElementById('lockout-banner').style.display = 'block';
+      document.getElementById('lockout-msg').textContent =
+        'You did not submit attendance for ' + formatDateDisplay(prevDay) + '. Please contact your Admin to unlock attendance for your branch.';
+      return;
+    }
+  } else {
+    // No session at all — first time use, check if today is not Monday and there was a previous working day
+    // Allow first-time entry always
+  }
+
+  // Load today's existing attendance (partial save)
+  const { data: todayAtt } = await db
+    .from('attendance')
+    .select('emp_id, status')
+    .eq('branch_code', BRANCH)
+    .eq('att_date', todayStr);
+
+  if (todayAtt) {
+    todayAtt.forEach(r => { attMap[r.emp_id] = r.status; });
+  }
+
+  renderEmployeeTable();
+}
+
+// ===================== RENDER TABLE =====================
+function renderEmployeeTable() {
+  const query = document.getElementById('emp-search').value.toLowerCase();
+  const filtered = employees.filter(e =>
+    e.name.toLowerCase().includes(query) || e.emp_id.toLowerCase().includes(query)
+  );
+  document.getElementById('emp-count-label').textContent = filtered.length + ' employees';
+
+  const tbody = document.getElementById('emp-body');
+  if (!filtered.length) {
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:24px;color:var(--muted)">No employees found</td></tr>';
+    updateSummary();
+    return;
+  }
+
+  tbody.innerHTML = filtered.map((e, i) => {
+    const cur = attMap[e.emp_id] || '';
+    return `<tr>
+      <td style="color:var(--muted);font-size:.8rem">${i+1}</td>
+      <td><code style="font-size:.8rem;background:#f0f4f8;padding:2px 6px;border-radius:4px">${e.emp_id}</code></td>
+      <td style="font-weight:600">${e.name}</td>
+      <td style="color:var(--muted);font-size:.82rem">${e.designation||'-'}</td>
+      <td>
+        <div class="status-group">
+          ${['Present','Absent','Half Day','Leave'].map(s => {
+            const code = s[0];
+            const sel = cur === s ? 'sel' : '';
+            return `<button class="status-btn ${code} ${sel}" onclick="setStatus('${e.emp_id}','${s}',this)">${s}</button>`;
+          }).join('')}
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+
+  updateSummary();
+}
+
+function setStatus(empId, status, btn) {
+  attMap[empId] = status;
+  // Update button states in that row
+  const row = btn.closest('tr');
+  row.querySelectorAll('.status-btn').forEach(b => b.classList.remove('sel'));
+  btn.classList.add('sel');
+  updateSummary();
+}
+
+function bulkMark(status) {
+  employees.forEach(e => { attMap[e.emp_id] = status; });
+  renderEmployeeTable();
+}
+
+function filterEmps() { renderEmployeeTable(); }
+
+function updateSummary() {
+  let p=0, a=0, h=0, l=0, u=0;
+  employees.forEach(e => {
+    const s = attMap[e.emp_id];
+    if (s === 'Present') p++;
+    else if (s === 'Absent') a++;
+    else if (s === 'Half Day') h++;
+    else if (s === 'Leave') l++;
+    else u++;
+  });
+  document.getElementById('cnt-p').textContent = p;
+  document.getElementById('cnt-a').textContent = a;
+  document.getElementById('cnt-h').textContent = h;
+  document.getElementById('cnt-l').textContent = l;
+  document.getElementById('cnt-u').textContent = u;
+}
+
+// ===================== SUBMIT =====================
+async function submitAttendance() {
+  const unmarked = employees.filter(e => !attMap[e.emp_id]);
+  if (unmarked.length > 0) {
+    if (!confirm(`${unmarked.length} employee(s) are not marked yet. They will be saved as Absent. Continue?`)) return;
+    unmarked.forEach(e => { attMap[e.emp_id] = 'Absent'; });
+    renderEmployeeTable();
+  }
+
+  ol(true, 'Submitting attendance...');
+  document.getElementById('submit-btn').disabled = true;
+
+  const records = employees.map(e => ({
+    branch_code: BRANCH,
+    emp_id: e.emp_id,
+    att_date: todayStr,
+    status: attMap[e.emp_id] || 'Absent',
+    marked_by: BRANCH
+  }));
+
+  const { error } = await db
+    .from('attendance')
+    .upsert(records, { onConflict: 'branch_code,emp_id,att_date' });
+
+  if (error) {
+    toast('Error saving attendance: ' + error.message, 'error');
+    document.getElementById('submit-btn').disabled = false;
+    ol(false);
+    return;
+  }
+
+  // Update session
+  await db.from('attendance_sessions').upsert({
+    branch_code: BRANCH,
+    last_submitted_date: todayStr,
+    updated_at: new Date().toISOString()
+  }, { onConflict: 'branch_code' });
+
+  // Audit
+  await db.from('audit_log').insert({
+    user_name: BRANCH,
+    action: 'Attendance Submitted',
+    details: `Branch ${BRANCH} submitted attendance for ${todayStr} — ${employees.length} employees`,
+    module: 'Attendance'
+  });
+
+  ol(false);
+  toast('Attendance submitted successfully!', 'success');
+  document.getElementById('att-card').style.display = 'none';
+  document.getElementById('submitted-banner').style.display = 'block';
+}
+
+// ===================== HISTORY =====================
+function switchHistView(view, btn) {
+  histView = view;
+  document.querySelectorAll('.v-tab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('hist-emp-filter').style.display = view === 'employee' ? 'block' : 'none';
+  document.getElementById('hist-content').innerHTML = '<p style="color:var(--muted);font-size:.88rem">Click View to load history.</p>';
+}
+
+async function loadHistory() {
+  const month = document.getElementById('hist-month').value;
+  if (!month) { toast('Select a month', 'info'); return; }
+
+  const [yr, mo] = month.split('-');
+  const start = `${yr}-${mo}-01`;
+  const end = `${yr}-${mo}-${new Date(yr, mo, 0).getDate()}`;
+
+  ol(true, 'Loading history...');
+
+  const { data, error } = await db
+    .from('attendance')
+    .select('emp_id, att_date, status')
+    .eq('branch_code', BRANCH)
+    .gte('att_date', start)
+    .lte('att_date', end)
+    .order('att_date');
+
+  ol(false);
+  if (error) { toast('Error: ' + error.message, 'error'); return; }
+  if (!data || !data.length) {
+    document.getElementById('hist-content').innerHTML = '<p style="color:var(--muted)">No attendance data for this month.</p>';
+    return;
+  }
+
+  const empFilter = document.getElementById('hist-emp-filter').value;
+
+  if (histView === 'daily') {
+    // Group by date
+    const byDate = {};
+    data.forEach(r => {
+      if (!byDate[r.att_date]) byDate[r.att_date] = [];
+      byDate[r.att_date].push(r);
+    });
+    const empMap = {};
+    employees.forEach(e => { empMap[e.emp_id] = e.name; });
+
+    let html = '<div style="overflow-x:auto"><table class="hist-table"><thead><tr><th>Date</th><th>Present</th><th>Half Day</th><th>Absent</th><th>Leave</th><th>Total</th></tr></thead><tbody>';
+    Object.keys(byDate).sort().forEach(date => {
+      const recs = byDate[date];
+      const p = recs.filter(r=>r.status==='Present').length;
+      const a = recs.filter(r=>r.status==='Absent').length;
+      const h = recs.filter(r=>r.status==='Half Day').length;
+      const l = recs.filter(r=>r.status==='Leave').length;
+      const d = new Date(date+'T00:00:00');
+      html += `<tr>
+        <td style="font-weight:600">${d.toLocaleDateString('en-IN',{weekday:'short',day:'numeric',month:'short'})}</td>
+        <td><span class="badge P">${p}</span></td>
+        <td><span class="badge H">${h}</span></td>
+        <td><span class="badge A">${a}</span></td>
+        <td><span class="badge L">${l}</span></td>
+        <td style="color:var(--muted)">${recs.length}</td>
+      </tr>`;
+    });
+    html += '</tbody></table></div>';
+    document.getElementById('hist-content').innerHTML = html;
+  } else {
+    // Group by employee
+    const empFilter = document.getElementById('hist-emp-filter').value;
+    const byEmp = {};
+    data.forEach(r => {
+      if (empFilter && r.emp_id !== empFilter) return;
+      if (!byEmp[r.emp_id]) byEmp[r.emp_id] = [];
+      byEmp[r.emp_id].push(r);
+    });
+    const empMap = {};
+    employees.forEach(e => { empMap[e.emp_id] = e.name; });
+
+    let html = '<div style="overflow-x:auto"><table class="hist-table"><thead><tr><th>Emp ID</th><th>Name</th><th>Present</th><th>Half Day</th><th>Absent</th><th>Leave</th><th>Working Days</th></tr></thead><tbody>';
+    Object.keys(byEmp).forEach(eid => {
+      const recs = byEmp[eid];
+      const p = recs.filter(r=>r.status==='Present').length;
+      const a = recs.filter(r=>r.status==='Absent').length;
+      const h = recs.filter(r=>r.status==='Half Day').length;
+      const l = recs.filter(r=>r.status==='Leave').length;
+      const eff = p + (h * 0.5);
+      html += `<tr>
+        <td><code style="font-size:.78rem;background:#f0f4f8;padding:2px 6px;border-radius:4px">${eid}</code></td>
+        <td style="font-weight:600">${empMap[eid]||eid}</td>
+        <td><span class="badge P">${p}</span></td>
+        <td><span class="badge H">${h}</span></td>
+        <td><span class="badge A">${a}</span></td>
+        <td><span class="badge L">${l}</span></td>
+        <td style="font-weight:700;color:var(--blue)">${eff}</td>
+      </tr>`;
+    });
+    html += '</tbody></table></div>';
+    document.getElementById('hist-content').innerHTML = html;
+  }
+}
+
+init();
+</script>
+</body>
+</html>
