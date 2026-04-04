@@ -212,7 +212,7 @@ async function openAddEmployee() {
   const bd = document.getElementById('emp_branch');
   bd.innerHTML = '<option value="">-- Select --</option>' + BRANCHES.map(b => `<option>${b}</option>`).join('');
   document.getElementById('addEmployeeModal').querySelector('.modal-title').innerHTML = '<i class="fas fa-user-plus mr-2"></i>Add Employee';
-  $('#addEmployeeModal').modal('show');
+  modalShow('addEmployeeModal');
 }
 
 async function openEditEmployee(empId) {
@@ -242,7 +242,7 @@ async function openEditEmployee(empId) {
   document.getElementById('empIdPreviewVal').textContent = empId;
   document.getElementById('empIdPreview').style.display = 'block';
   document.getElementById('addEmployeeModal').querySelector('.modal-title').innerHTML = '<i class="fas fa-edit mr-2"></i>Edit Employee — ' + empId;
-  $('#addEmployeeModal').modal('show');
+  modalShow('addEmployeeModal');
 }
 
 function toggleCustomPf() {
@@ -297,7 +297,7 @@ async function submitAddEmployee() {
   ol(false);
   if (error) { toast('Error: '+error.message,'error'); return; }
   toast((currentEditEmpId?'Employee updated!':'Employee '+empId+' added!'),'success');
-  $('#addEmployeeModal').modal('hide');
+  modalHide('addEmployeeModal');
   await audit((currentEditEmpId?'Employee Updated':'Employee Added'), empId+' — '+name, 'Employees');
   loadEmployees();
   loadDashboard();
@@ -334,11 +334,11 @@ async function viewEmployee(empId) {
       </table></div>
     </div>
     <div class="mt-2">
-      <button class="btn btn-sm btn-success mr-2" onclick="$('#viewEmployeeModal').modal('hide');showPage('salary');setTimeout(()=>document.getElementById('salEmpId').value='${emp.emp_id}',500)"><i class="fas fa-money-bill-wave mr-1"></i>Process Salary</button>
-      <button class="btn btn-sm btn-info mr-2" onclick="$('#viewEmployeeModal').modal('hide');showPage('payslip');setTimeout(()=>document.getElementById('psEmpId').value='${emp.emp_id}',500)"><i class="fas fa-file-invoice mr-1"></i>Payslip</button>
-      <button class="btn btn-sm btn-warning" onclick="$('#viewEmployeeModal').modal('hide');openEditEmployee('${emp.emp_id}')"><i class="fas fa-edit mr-1"></i>Edit</button>
+      <button class="btn btn-sm btn-success mr-2" onclick="modalHide('viewEmployeeModal');showPage('salary');setTimeout(()=>document.getElementById('salEmpId').value='${emp.emp_id}',500)"><i class="fas fa-money-bill-wave mr-1"></i>Process Salary</button>
+      <button class="btn btn-sm btn-info mr-2" onclick="modalHide('viewEmployeeModal');showPage('payslip');setTimeout(()=>document.getElementById('psEmpId').value='${emp.emp_id}',500)"><i class="fas fa-file-invoice mr-1"></i>Payslip</button>
+      <button class="btn btn-sm btn-warning" onclick="modalHide('viewEmployeeModal');openEditEmployee('${emp.emp_id}')"><i class="fas fa-edit mr-1"></i>Edit</button>
     </div>`;
-  $('#viewEmployeeModal').modal('show');
+  modalShow('viewEmployeeModal');
 }
 
 // ============================================================
@@ -958,7 +958,7 @@ function openSetPin(branch){
   pinBranchTarget=branch;
   document.getElementById('pinBranchLabel').textContent=branch;
   document.getElementById('pinInput').value='';
-  $('#setPinModal').modal('show');
+  modalShow('setPinModal');
 }
 async function saveBranchPin(){
   const pin=document.getElementById('pinInput').value.trim();
@@ -968,7 +968,7 @@ async function saveBranchPin(){
   ol(false);
   if(error){toast('Error: '+error.message,'error');return;}
   toast('PIN saved for '+pinBranchTarget,'success');
-  $('#setPinModal').modal('hide');
+  modalHide('setPinModal');
   await audit('Branch PIN Set','PIN set for '+pinBranchTarget,'Attendance');
   loadBranchAccessTable();
 }
@@ -1225,7 +1225,7 @@ async function loadAdminUsers(){
     </td></tr>`).join('');
 }
 
-function openAddAdmin(){$('#addAdminModal').modal('show');}
+function openAddAdmin(){modalShow('addAdminModal');}
 async function submitAddAdmin(){
   const name=document.getElementById('newAdminName').value.trim();
   const username=document.getElementById('newAdminUsername').value.trim();
@@ -1237,7 +1237,7 @@ async function submitAddAdmin(){
   ol(false);
   if(error){toast('Error: '+error.message,'error');return;}
   toast('Admin '+username+' added!','success');
-  $('#addAdminModal').modal('hide');
+  modalHide('addAdminModal');
   await audit('Admin Added',username+' ('+role+')','Users');
   loadAdminUsers();
 }
@@ -1344,3 +1344,101 @@ async function exportEmpCsv(){
   const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='Employees_Export.csv';a.click();
   toast('Employee list exported!','success');
 }
+
+// ============================================================
+// VANILLA MODAL HELPERS — no jQuery needed
+// ============================================================
+function modalShow(id) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.style.display = 'flex';
+  el.classList.add('show');
+  document.body.classList.add('modal-open');
+  // backdrop
+  let bd = document.getElementById('modal-backdrop');
+  if (!bd) {
+    bd = document.createElement('div');
+    bd.id = 'modal-backdrop';
+    bd.className = 'modal-backdrop fade show';
+    document.body.appendChild(bd);
+    bd.addEventListener('click', () => modalHideAll());
+  }
+}
+function modalHide(id) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.style.display = 'none';
+  el.classList.remove('show');
+  document.body.classList.remove('modal-open');
+  const bd = document.getElementById('modal-backdrop');
+  if (bd) bd.remove();
+}
+function modalHideAll() {
+  document.querySelectorAll('.modal.show').forEach(m => {
+    m.style.display = 'none';
+    m.classList.remove('show');
+  });
+  document.body.classList.remove('modal-open');
+  const bd = document.getElementById('modal-backdrop');
+  if (bd) bd.remove();
+}
+// Wire close buttons
+document.addEventListener('DOMContentLoaded', () => {
+  document.querySelectorAll('[data-dismiss="modal"]').forEach(btn => {
+    btn.addEventListener('click', modalHideAll);
+  });
+  // Close on Escape
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') modalHideAll(); });
+});
+
+// ============================================================
+// RESPONSIVE SIDEBAR TOGGLE
+// ============================================================
+function toggleSidebar() {
+  const sb = document.getElementById('sidebar');
+  const ov = document.getElementById('sidebarOverlay');
+  const cr = document.getElementById('sbCloseRow');
+  if (sb.classList.contains('open')) {
+    closeSidebar();
+  } else {
+    sb.classList.add('open');
+    ov.classList.add('show');
+    if (cr) cr.style.display = 'flex';
+  }
+}
+function closeSidebar() {
+  const sb = document.getElementById('sidebar');
+  const ov = document.getElementById('sidebarOverlay');
+  const cr = document.getElementById('sbCloseRow');
+  sb.classList.remove('open');
+  ov.classList.remove('show');
+  if (cr) cr.style.display = 'none';
+}
+// Auto-close sidebar on page nav on mobile
+const _origShowPage = showPage;
+// Patch showPage to auto-close sidebar on small screens
+const __showPagePatched = function(page) {
+  _origShowPage(page);
+  if (window.innerWidth <= 900) closeSidebar();
+};
+// Override all sb-link clicks to use patched version
+document.addEventListener('DOMContentLoaded', () => {
+  document.querySelectorAll('.sb-link').forEach(link => {
+    const origOnclick = link.getAttribute('onclick');
+    if (origOnclick) {
+      link.setAttribute('onclick', origOnclick.replace('showPage(', '__showPagePatched('));
+    }
+  });
+  // Show close row on mobile resize
+  function checkResize() {
+    const cr = document.getElementById('sbCloseRow');
+    if (cr) cr.style.display = window.innerWidth <= 900 ? 'flex' : 'none';
+  }
+  window.addEventListener('resize', checkResize);
+});
+
+// Make patched version globally available for onclick attributes
+window.__showPagePatched = function(page) {
+  showPage(page);
+  if (window.innerWidth <= 900) closeSidebar();
+};
