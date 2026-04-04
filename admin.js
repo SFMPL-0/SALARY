@@ -1055,7 +1055,7 @@ async function loadYearlyReport(){
     if(!empMap[r.emp_id])empMap[r.emp_id]={name:r.name,branch:r.branch,months:{}};
     empMap[r.emp_id].months[r.month]=r;
   });
-  let html=`<div class="table-card"><div class="table-head"><h5><i class="fas fa-chart-bar"></i>Yearly Salary Register — FY 2025-26</h5></div>
+  let html=`<div class="table-card"><div class="table-head"><h5><i class="fas fa-chart-bar"></i>Yearly Salary Register — FY 2026-27</h5></div>
   <div class="table-responsive"><table class="table table-sm mb-0" style="font-size:.75rem">
     <thead><tr><th>Emp ID</th><th>Name</th><th>Branch</th>${MONTHS.map(m=>`<th style="white-space:nowrap">${m.split(' ')[0].substring(0,3)}</th>`).join('')}<th>Total Net</th></tr></thead>
     <tbody>`;
