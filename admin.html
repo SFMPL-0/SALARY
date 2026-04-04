@@ -68,6 +68,30 @@ body{font-family:'Barlow',sans-serif;background:var(--surface);margin:0;min-heig
 .rate-box label{font-size:.72rem;font-weight:700;color:var(--navy);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:7px}
 .rate-box input{width:100%;padding:8px;text-align:center;border:1.5px solid #c5d8f0;border-radius:6px;font-size:1rem;font-weight:700;color:var(--navy);font-family:'Barlow',sans-serif}
 .rate-box .rate-sfx{font-size:.72rem;color:var(--muted);margin-top:3px}
+/* MODALS — vanilla JS controlled */
+.modal{display:none;position:fixed;inset:0;z-index:1050;align-items:center;justify-content:center;padding:16px}
+.modal.show{display:flex!important}
+.modal-dialog{width:100%;margin:0 auto;max-height:90vh;display:flex;flex-direction:column}
+.modal-content{border-radius:14px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.3);display:flex;flex-direction:column;max-height:90vh}
+.modal-body{overflow-y:auto}
+.modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:1040}
+/* HAMBURGER */
+.hamburger{display:none;background:none;border:none;color:#fff;font-size:1.3rem;cursor:pointer;padding:6px 10px;border-radius:6px;transition:.2s}
+.hamburger:hover{background:rgba(255,255,255,.15)}
+.sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:99}
+.sidebar-overlay.show{display:block}
+/* RESPONSIVE */
+@media(max-width:900px){
+  .hamburger{display:flex;align-items:center}
+  .sidebar{transform:translateX(-100%);transition:transform .28s ease;z-index:150}
+  .sidebar.open{transform:translateX(0)}
+  .main{margin-left:0}
+  .nav-brand{font-size:.95rem}
+}
+@media(max-width:520px){
+  .main{padding:14px 10px}
+  .stat-card .sv{font-size:1.4rem}
+}
 /* LOADING */
 #loadingOverlay{position:fixed;inset:0;background:rgba(255,255,255,.9);z-index:9999;display:none;align-items:center;justify-content:center;flex-direction:column;gap:12px}
 #loadingOverlay.show{display:flex}
@@ -98,40 +122,47 @@ body{font-family:'Barlow',sans-serif;background:var(--surface);margin:0;min-heig
 
 <!-- NAVBAR -->
 <nav class="navbar">
-  <div class="nav-brand"><i class="fas fa-truck"></i>SUNRISE FREIGHT MOVERS <span>Admin</span></div>
+  <div style="display:flex;align-items:center;gap:10px">
+    <button class="hamburger" id="hamburgerBtn" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
+    <div class="nav-brand"><i class="fas fa-truck"></i>SUNRISE FREIGHT MOVERS <span>Admin</span></div>
+  </div>
   <div class="nav-right">
     <div class="nav-user"><i class="fas fa-user-shield"></i><span id="currentUser">Loading...</span></div>
     <button class="btn-nav-logout" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</button>
   </div>
 </nav>
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
 
 <!-- SIDEBAR -->
-<div class="sidebar">
+<div class="sidebar" id="sidebar">
+  <div style="display:none;justify-content:flex-end;padding:8px 12px" id="sbCloseRow">
+    <button onclick="closeSidebar()" style="background:rgba(255,255,255,.1);border:none;color:#fff;border-radius:6px;padding:5px 10px;cursor:pointer;font-size:.85rem"><i class="fas fa-times"></i></button>
+  </div>
   <div class="sb-section">Main</div>
-  <div class="sb-link active" onclick="showPage('dashboard')"><i class="fas fa-tachometer-alt"></i>Dashboard</div>
+  <div class="sb-link active" onclick="__showPagePatched('dashboard')"><i class="fas fa-tachometer-alt"></i>Dashboard</div>
   <div class="sb-section">Employees</div>
-  <div class="sb-link" onclick="showPage('employees')"><i class="fas fa-users"></i>Employee Master</div>
-  <div class="sb-link" onclick="showPage('salary')"><i class="fas fa-money-bill-wave"></i>Salary Entry</div>
-  <div class="sb-link" onclick="showPage('bulk')"><i class="fas fa-layer-group"></i>Bulk Salary Entry</div>
-  <div class="sb-link" onclick="showPage('bonus')"><i class="fas fa-gift"></i>Annual Bonus</div>
-  <div class="sb-link" onclick="showPage('revision')"><i class="fas fa-sync-alt"></i>Salary Revision</div>
-  <div class="sb-link" onclick="showPage('leave')"><i class="fas fa-calendar-minus"></i>Leave &amp; LOP</div>
-  <div class="sb-link" onclick="showPage('payslip')"><i class="fas fa-file-invoice"></i>Payslip</div>
+  <div class="sb-link" onclick="__showPagePatched('employees')"><i class="fas fa-users"></i>Employee Master</div>
+  <div class="sb-link" onclick="__showPagePatched('salary')"><i class="fas fa-money-bill-wave"></i>Salary Entry</div>
+  <div class="sb-link" onclick="__showPagePatched('bulk')"><i class="fas fa-layer-group"></i>Bulk Salary Entry</div>
+  <div class="sb-link" onclick="__showPagePatched('bonus')"><i class="fas fa-gift"></i>Annual Bonus</div>
+  <div class="sb-link" onclick="__showPagePatched('revision')"><i class="fas fa-sync-alt"></i>Salary Revision</div>
+  <div class="sb-link" onclick="__showPagePatched('leave')"><i class="fas fa-calendar-minus"></i>Leave &amp; LOP</div>
+  <div class="sb-link" onclick="__showPagePatched('payslip')"><i class="fas fa-file-invoice"></i>Payslip</div>
   <div class="sb-section">Attendance</div>
-  <div class="sb-link" onclick="showPage('att_overview')"><i class="fas fa-clipboard-check"></i>Attendance Overview</div>
-  <div class="sb-link" onclick="showPage('att_manage')"><i class="fas fa-user-cog"></i>Manage Branch Access</div>
+  <div class="sb-link" onclick="__showPagePatched('att_overview')"><i class="fas fa-clipboard-check"></i>Attendance Overview</div>
+  <div class="sb-link" onclick="__showPagePatched('att_manage')"><i class="fas fa-user-cog"></i>Manage Branch Access</div>
   <div class="sb-section">Reports</div>
-  <div class="sb-link" onclick="showPage('monthly')"><i class="fas fa-calendar-alt"></i>Monthly Report</div>
-  <div class="sb-link" onclick="showPage('yearly')"><i class="fas fa-chart-bar"></i>Yearly Report</div>
-  <div class="sb-link" onclick="showPage('pfesi')"><i class="fas fa-shield-alt"></i>PF &amp; ESI Summary</div>
-  <div class="sb-link" onclick="showPage('gratuity')"><i class="fas fa-medal"></i>Gratuity Tracker</div>
-  <div class="sb-link" onclick="showPage('bank')"><i class="fas fa-university"></i>Bank Transfer</div>
+  <div class="sb-link" onclick="__showPagePatched('monthly')"><i class="fas fa-calendar-alt"></i>Monthly Report</div>
+  <div class="sb-link" onclick="__showPagePatched('yearly')"><i class="fas fa-chart-bar"></i>Yearly Report</div>
+  <div class="sb-link" onclick="__showPagePatched('pfesi')"><i class="fas fa-shield-alt"></i>PF &amp; ESI Summary</div>
+  <div class="sb-link" onclick="__showPagePatched('gratuity')"><i class="fas fa-medal"></i>Gratuity Tracker</div>
+  <div class="sb-link" onclick="__showPagePatched('bank')"><i class="fas fa-university"></i>Bank Transfer</div>
   <div class="sb-section">Settings</div>
-  <div class="sb-link" onclick="showPage('settings')"><i class="fas fa-sliders-h"></i>Master Settings</div>
-  <div class="sb-link" onclick="showPage('branches')"><i class="fas fa-map-marker-alt"></i>Branches</div>
-  <div class="sb-link" onclick="showPage('users')"><i class="fas fa-user-shield"></i>Admin Users</div>
-  <div class="sb-link" onclick="showPage('auditlog')"><i class="fas fa-history"></i>Audit Log</div>
-  <div class="sb-link" onclick="showPage('import')"><i class="fas fa-file-upload"></i>CSV Import</div>
+  <div class="sb-link" onclick="__showPagePatched('settings')"><i class="fas fa-sliders-h"></i>Master Settings</div>
+  <div class="sb-link" onclick="__showPagePatched('branches')"><i class="fas fa-map-marker-alt"></i>Branches</div>
+  <div class="sb-link" onclick="__showPagePatched('users')"><i class="fas fa-user-shield"></i>Admin Users</div>
+  <div class="sb-link" onclick="__showPagePatched('auditlog')"><i class="fas fa-history"></i>Audit Log</div>
+  <div class="sb-link" onclick="__showPagePatched('import')"><i class="fas fa-file-upload"></i>CSV Import</div>
 </div>
 
 <div class="main">
@@ -148,12 +179,12 @@ body{font-family:'Barlow',sans-serif;background:var(--surface);margin:0;min-heig
   <div class="table-card mb-4">
     <div class="table-head"><h5><i class="fas fa-bolt"></i>Quick Actions</h5></div>
     <div class="p-3"><div class="row">
-      <div class="col-6 col-md-2 mb-3"><div class="action-btn" onclick="showPage('employees');openAddEmployee()"><i class="fas fa-user-plus" style="color:#2980b9"></i><span>Add Employee</span></div></div>
-      <div class="col-6 col-md-2 mb-3"><div class="action-btn" onclick="showPage('salary')"><i class="fas fa-money-bill-wave" style="color:#27ae60"></i><span>Enter Salary</span></div></div>
-      <div class="col-6 col-md-2 mb-3"><div class="action-btn" onclick="showPage('bulk')"><i class="fas fa-layer-group" style="color:#e67e22"></i><span>Bulk Salary</span></div></div>
-      <div class="col-6 col-md-2 mb-3"><div class="action-btn" onclick="showPage('payslip')"><i class="fas fa-file-invoice" style="color:#8b5cf6"></i><span>Payslip</span></div></div>
-      <div class="col-6 col-md-2 mb-3"><div class="action-btn" onclick="showPage('monthly')"><i class="fas fa-calendar-alt" style="color:#16a085"></i><span>Monthly Report</span></div></div>
-      <div class="col-6 col-md-2 mb-3"><div class="action-btn" onclick="showPage('att_overview')"><i class="fas fa-clipboard-check" style="color:#e74c3c"></i><span>Attendance</span></div></div>
+      <div class="col-6 col-md-2 mb-3"><div class="action-btn" onclick="__showPagePatched('employees');openAddEmployee()"><i class="fas fa-user-plus" style="color:#2980b9"></i><span>Add Employee</span></div></div>
+      <div class="col-6 col-md-2 mb-3"><div class="action-btn" onclick="__showPagePatched('salary')"><i class="fas fa-money-bill-wave" style="color:#27ae60"></i><span>Enter Salary</span></div></div>
+      <div class="col-6 col-md-2 mb-3"><div class="action-btn" onclick="__showPagePatched('bulk')"><i class="fas fa-layer-group" style="color:#e67e22"></i><span>Bulk Salary</span></div></div>
+      <div class="col-6 col-md-2 mb-3"><div class="action-btn" onclick="__showPagePatched('payslip')"><i class="fas fa-file-invoice" style="color:#8b5cf6"></i><span>Payslip</span></div></div>
+      <div class="col-6 col-md-2 mb-3"><div class="action-btn" onclick="__showPagePatched('monthly')"><i class="fas fa-calendar-alt" style="color:#16a085"></i><span>Monthly Report</span></div></div>
+      <div class="col-6 col-md-2 mb-3"><div class="action-btn" onclick="__showPagePatched('att_overview')"><i class="fas fa-clipboard-check" style="color:#e74c3c"></i><span>Attendance</span></div></div>
     </div></div>
   </div>
   <div class="row">
@@ -743,8 +774,6 @@ body{font-family:'Barlow',sans-serif;background:var(--surface);margin:0;min-heig
 
 <script src="config.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/4.6.2/js/bootstrap.bundle.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 <script src="admin.js"></script>
 </body>
 </html>
