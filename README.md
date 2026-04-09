@@ -1,5 +1,5 @@
 # SUNRISE FREIGHT MOVERS — Salary & HR System
-### Supabase + GitHub Pages Edition | FY 2025-26
+### Supabase + GitHub Pages Edition | FY 2026-27
 
 ---
 
@@ -205,7 +205,7 @@ Branch users login at the same URL → click **"Branch Login"** tab
 Admin → **Master Settings** → update:
 - Company Name, GST No., Address
 - PAN / TAN of Deductor (for Form 16)
-- PF / ESI percentages (defaults are correct for FY 2025-26)
+- PF / ESI percentages (defaults are correct for FY 2026-27)
 - Professional Tax state (per-branch PT is auto-applied using branch state map)
 
 ---
