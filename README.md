@@ -1,4 +1,4 @@
-# SUNRISE FREIGHT MOVERS — Salary & HR System
+# Salary & HR System
 ### Supabase + GitHub Pages Edition | FY 2026-27
 
 ---
