@@ -3,8 +3,8 @@
    Replace YOUR_SUPABASE_URL and YOUR_SUPABASE_ANON_KEY
    with your actual values from Supabase → Settings → API
    ============================================================ */
-const SUPABASE_URL = 'https://yvueitwmbjqkraxdutlt.supabase.co';
-const SUPABASE_ANON_KEY = 'sb_publishable_M7jJxdgOcUqvkLE_i89Psw_1yJuahG5';
+const SUPABASE_URL = 'https://bnnbhusxkcpqgyvkppzr.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_5J149rlT-uEMxOc8uJjFkQ_rtTd7oCu';
 
 const BRANCHES = [
   'DR','DAN','BNG','HO','VAPI','DAHEJ','MNG','CHENNAI',
